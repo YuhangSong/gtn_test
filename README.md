@@ -9,7 +9,7 @@ These algorithms will make it easier for the research community to replicate, re
 You can install it by typing:
 
 ```
-mkdir -p gtn_env/project/ && cd gtn_env/project/ && git clone https://github.com/YuhangSong/gtn.git && cd gtn && source ~/.bashrc && conda create -n gtn_env -y && source activate gtn_env && pip install -e .
+mkdir -p gtn_env/project/ && cd gtn_env/project/ && git clone https://github.com/YuhangSong/gtn.git && cd gtn && source ~/.bashrc && conda create -n gtn_env -y && source activate gtn_env && pip install -e . && pip install visdom matplotlib sklearn dill
 ```
 
 - [A2C](baselines/a2c)
