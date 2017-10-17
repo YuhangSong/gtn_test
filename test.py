@@ -12,7 +12,7 @@ import plot
 import numpy as np
 
 
-def test(rank, args, shared_model, LOGDIR,DSP,params_str,MULTI_RUN):
+def test(rank, args, shared_model, LOGDIR, DSP, params_str, MULTI_RUN, game_total, game, game_i,):
 
     '''build and try restore logger'''
     logger = plot.logger(LOGDIR,DSP,params_str,MULTI_RUN)
@@ -23,7 +23,12 @@ def test(rank, args, shared_model, LOGDIR,DSP,params_str,MULTI_RUN):
     env = create_atari_env(args.env_name)
     env.seed(args.seed + rank)
 
-    model = ActorCritic(env.observation_space.shape[0], env.action_space)
+    model = ActorCritic(
+        num_inputs=env.observation_space.shape[0],
+        action_space=env.action_space,
+        game_total=game_total,
+        game_i=game_i,
+    )
 
     model.eval()
 

@@ -15,13 +15,20 @@ def ensure_shared_grads(model, shared_model):
         shared_param._grad = param.grad
 
 
-def train(rank, args, shared_model, optimizer=None):
+def train(rank, args, shared_model, game_total, game, game_i, optimizer=None):
     torch.manual_seed(args.seed + rank)
 
-    env = create_atari_env(args.env_name)
+    env = create_atari_env(game)
     env.seed(args.seed + rank)
 
-    model = ActorCritic(env.observation_space.shape[0], env.action_space)
+    model = ActorCritic(
+        num_inputs=env.observation_space.shape[0],
+        action_space=env.action_space,
+        game_total=game_total,
+        game_i=game_i,
+    )
+
+    print('game '+game+' with action_space: '+str(env.action_space))
 
     if optimizer is None:
         optimizer = optim.Adam(shared_model.parameters(), lr=args.lr)

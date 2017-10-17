@@ -60,7 +60,15 @@ def add_parameters(**kwargs):
 # the first level of log dir
 add_parameters(EXP = 'exp_1')
 
+add_parameters(GAME_DIC = 'test mt pong')
+
 add_parameters(TIME_TO = 6*60*60)
+
+'''
+generate settings
+'''
+from game_dic import game_dic
+game_list = game_dic[params['GAME_DIC']]
 
 '''
 summary settings
@@ -94,11 +102,18 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # uncomment when it's fixed in pytorch
-    # torch.manual_seed(args.seed)
+    torch.manual_seed(args.seed)
+
+    game_total = len(game_list)
 
     env = create_atari_env(args.env_name)
     shared_model = ActorCritic(
-        env.observation_space.shape[0], env.action_space)
+        num_inputs=env.observation_space.shape[0],
+        action_space=env.action_space,
+        game_total=game_total,
+        game_i=0,
+    )
+
     shared_model.share_memory()
 
     if args.no_shared:
@@ -109,13 +124,39 @@ if __name__ == '__main__':
 
     processes = []
 
-    p = mp.Process(target=test, args=(args.num_processes, args, shared_model,LOGDIR,DSP,params_str,MULTI_RUN))
+    p = mp.Process(target=test, args=(args.num_processes, args, shared_model, LOGDIR, DSP, params_str, MULTI_RUN))
     p.start()
     processes.append(p)
 
-    for rank in range(0, args.num_processes):
-        p = mp.Process(target=train, args=(rank, args, shared_model, optimizer))
-        p.start()
-        processes.append(p)
+    process_per_game = args.num_processes / len(game_list)
+    if process_per_game < 1:
+        process_per_game = 1
+
+    print('process_per_game: '+str(process_per_game))
+
+    rank = 0
+    game_i = 0
+    for game in game_list:
+        for game_process_i in range(int(process_per_game)):
+            print('create for game: '+game+' | process: '+str(game_process_i))
+            p = mp.Process(target=train, args=(
+                rank,
+                args,
+                shared_model,
+                game_total,
+                game,
+                game_i,
+                optimizer,
+                ))
+            p.start()
+            processes.append(p)
+            rank += 1
+        game_i += 1
+
+    # for rank in range(0, args.num_processes):
+    #     p = mp.Process(target=train, args=(rank, args, shared_model, optimizer))
+    #     p.start()
+    #     processes.append(p)
+
     for p in processes:
         p.join()
