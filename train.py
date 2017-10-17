@@ -33,6 +33,7 @@ def train(rank, args, shared_model, optimizer=None):
     done = True
 
     episode_length = 0
+    
     while True:
         # Sync with the shared model
         model.load_state_dict(shared_model.state_dict())
@@ -106,3 +107,5 @@ def train(rank, args, shared_model, optimizer=None):
 
         ensure_shared_grads(model, shared_model)
         optimizer.step()
+
+    print('Reach!!!')

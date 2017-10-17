@@ -19,6 +19,20 @@ Contributions are very welcome. If you know how to make this code better, don't 
 
 ## Usage
 ```bash
+sudo apt autoremove && sudo apt-get install -y tmux htop cmake golang libjpeg-dev git
+
+source ~/.bashrc && source deactivate && conda remove --name gtn_env --all
+conda create -n gtn_env && source ~/.bashrc && source activate gtn_env
+
+pip install scipy universe six visdom "gym[atari]" matplotlib dill pygame imageio opencv-python 
+
+rm -r gtn_env
+mkdir -p gtn_env/project/ && cd gtn_env/project/
+
+wget http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl  && pip install http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl && pip3 install torchvision
+
+git clone https://github.com/YuhangSong/gtn.git && cd gtn
+
 # Works only wih Python 3.
 OMP_NUM_THREADS=1 python3 main.py --env-name "PongDeterministic-v4" --num-processes 16
 ```

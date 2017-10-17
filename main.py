@@ -3,6 +3,7 @@ from __future__ import print_function
 import argparse
 import os
 
+import subprocess
 import torch
 import torch.multiprocessing as mp
 
@@ -42,6 +43,51 @@ parser.add_argument('--no-shared', default=False,
                     help='use an optimizer without shared momentum.')
 
 
+'''if delete logdir and start a new run'''
+CLEAR_RUN = True 
+
+'''display a tag before the result printed, to identify multiple runs on your machine'''
+MULTI_RUN = 'GTN_1'
+
+# create params and manage function
+params = {}
+params_seq = []
+def add_parameters(**kwargs):
+    global params_seq
+    params_seq += kwargs.keys()
+    params.update(kwargs)
+
+# the first level of log dir
+add_parameters(EXP = 'exp_1')
+
+add_parameters(TIME_TO = 6*60*60)
+
+'''
+summary settings
+to create log dir and params, do not modify if not
+necessary.
+'''
+DSP = ''
+params_str = 'Settings'+'\n'
+params_str += '##################################'+'\n'
+for i in range(len(params_seq)):
+    DSP += params_seq[i]+'_'+str(params[params_seq[i]]).replace('.','_').replace(',','_').replace(' ','_')+'/'
+    params_str += params_seq[i]+' >> '+str(params[params_seq[i]])+'\n'
+params_str += '##################################'+'\n'
+print(params_str)
+
+'''
+build log dir
+'''
+BASIC = '../../result/'
+LOGDIR = BASIC+DSP
+if CLEAR_RUN:
+    subprocess.call(["rm", "-r", LOGDIR])
+subprocess.call(["mkdir", "-p", LOGDIR])
+with open(LOGDIR+"Settings.txt","a") as f:
+    f.write(params_str)
+
+
 if __name__ == '__main__':
     os.environ['OMP_NUM_THREADS'] = '1'
 
@@ -63,7 +109,7 @@ if __name__ == '__main__':
 
     processes = []
 
-    p = mp.Process(target=test, args=(args.num_processes, args, shared_model))
+    p = mp.Process(target=test, args=(args.num_processes, args, shared_model,LOGDIR,DSP,params_str,MULTI_RUN))
     p.start()
     processes.append(p)
 

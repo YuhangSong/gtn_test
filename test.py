@@ -8,8 +8,16 @@ from torch.autograd import Variable
 from envs import create_atari_env
 from model import ActorCritic
 
+import plot
+import numpy as np
 
-def test(rank, args, shared_model):
+
+def test(rank, args, shared_model, LOGDIR,DSP,params_str,MULTI_RUN):
+
+    '''build and try restore logger'''
+    logger = plot.logger(LOGDIR,DSP,params_str,MULTI_RUN)
+    iteration = logger.restore()
+
     torch.manual_seed(args.seed + rank)
 
     env = create_atari_env(args.env_name)
@@ -23,6 +31,8 @@ def test(rank, args, shared_model):
     state = torch.from_numpy(state)
     reward_sum = 0
     done = True
+
+    log_count = 0
 
     start_time = time.time()
 
@@ -59,10 +69,28 @@ def test(rank, args, shared_model):
                 time.strftime("%Hh %Mm %Ss",
                               time.gmtime(time.time() - start_time)),
                 reward_sum, episode_length))
+
+            # print(reward_sum)
+
+            logger.plot(
+                'episode reward',
+                np.asarray([reward_sum])
+            )
+            logger.plot(
+                'episode length',
+                np.asarray([float(episode_length)])
+            )
+            log_count += 1
+
             reward_sum = 0
             episode_length = 0
             actions.clear()
             state = env.reset()
+
+            logger.tick()
             time.sleep(60)
+
+            if log_count>3:
+                logger.flush()
 
         state = torch.from_numpy(state)
