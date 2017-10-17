@@ -32,10 +32,18 @@ mkdir -p gtn_env/project/ && cd gtn_env/project/
 wget http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl  && pip install http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp36-cp36m-manylinux1_x86_64.whl && pip3 install torchvision
 
 git clone https://github.com/YuhangSong/gtn.git && cd gtn
+```
 
+```bash
 # Works only wih Python 3.
 OMP_NUM_THREADS=1 python3 main.py --env-name "PongDeterministic-v4" --num-processes 16
 ```
+
+```
+source ~/.bashrc && source activate gtn_env && python -m visdom.server
+```
+
+Solve visdom show nothing problem by add Proxy SwitchySharp to Chrome you are using.
 
 This code runs evaluation in a separate thread in addition to 16 processes.
 
