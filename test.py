@@ -8,15 +8,10 @@ from torch.autograd import Variable
 from envs import create_atari_env
 from model import ActorCritic
 
-import plot
 import numpy as np
 
 
-def test(rank, args, shared_model, LOGDIR, DSP, params_str, MULTI_RUN, game_total, game, game_i,):
-
-    '''build and try restore logger'''
-    logger = plot.logger(LOGDIR,DSP,params_str,MULTI_RUN)
-    iteration = logger.restore()
+def test(rank, args, shared_model, game_total, game, game_i, logger):
 
     torch.manual_seed(args.seed + rank)
 
@@ -93,7 +88,7 @@ def test(rank, args, shared_model, LOGDIR, DSP, params_str, MULTI_RUN, game_tota
             state = env.reset()
 
             logger.tick()
-            time.sleep(60)
+            time.sleep(1)
 
             if log_count>3:
                 logger.flush()

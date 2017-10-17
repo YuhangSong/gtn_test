@@ -95,14 +95,18 @@ subprocess.call(["mkdir", "-p", LOGDIR])
 with open(LOGDIR+"Settings.txt","a") as f:
     f.write(params_str)
 
+import plot
+'''build and try restore logger'''
+logger = plot.logger(LOGDIR,DSP,params_str,MULTI_RUN)
+iteration = logger.restore()
 
 if __name__ == '__main__':
     os.environ['OMP_NUM_THREADS'] = '1'
 
     args = parser.parse_args()
 
-    # uncomment when it's fixed in pytorch
-    torch.manual_seed(args.seed)
+    # # uncomment when it's fixed in pytorch
+    # torch.manual_seed(args.seed)
 
     game_total = len(game_list)
 
@@ -124,9 +128,20 @@ if __name__ == '__main__':
 
     processes = []
 
-    p = mp.Process(target=test, args=(args.num_processes, args, shared_model, LOGDIR, DSP, params_str, MULTI_RUN))
-    p.start()
-    processes.append(p)
+    game_i = 0
+    for game in game_list:
+        p = mp.Process(target=test, args=(
+            args.num_processes, 
+            args, 
+            shared_model, 
+            game_total,
+            game, 
+            game_i,
+            logger,
+        ))
+        p.start()
+        processes.append(p)
+        game_i += 1
 
     process_per_game = args.num_processes / len(game_list)
     if process_per_game < 1:
